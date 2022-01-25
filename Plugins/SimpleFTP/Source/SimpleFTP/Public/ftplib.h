@@ -34,11 +34,11 @@
 
 #if defined(_WIN32)
 
-#if BUILDING_DLL
-# define DLLIMPORT __declspec (dllexport)
-#else /* Not BUILDING_DLL */
-# define DLLIMPORT __declspec (dllimport)
-#endif /* Not BUILDING_DLL */
+//#if BUILDING_DLL
+//# define DLLIMPORT __declspec (dllexport)
+//#else /* Not BUILDING_DLL */
+//# define DLLIMPORT __declspec (dllimport)
+//#endif /* Not BUILDING_DLL */
 
 #include <time.h>
 #endif
@@ -124,7 +124,7 @@ struct ftphandle {
 };
 
 #if defined(_WIN32)
-class DLLIMPORT ftplib {
+class SIMPLEFTP_API ftplib {
 #else
 class ftplib {
 #endif
