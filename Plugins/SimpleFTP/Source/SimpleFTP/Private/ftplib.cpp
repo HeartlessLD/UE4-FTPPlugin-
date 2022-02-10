@@ -556,7 +556,19 @@ int ftplib::Login(const char *user, const char *pass)
 		return 0;
 	}
 	sprintf(tempbuf,"PASS %s",pass);
-	return FtpSendCmd(tempbuf,'2',mp_ftphandle);
+	int ret = FtpSendCmd(tempbuf, '2', mp_ftphandle);
+	if(ret)
+	{
+		ret = SwitchToUtf8();
+	}
+	return ret;
+}
+
+int ftplib::SwitchToUtf8()
+{
+	char tempbuf[64];
+	sprintf(tempbuf, "opts utf8 on");
+	return FtpSendCmd(tempbuf, '2', mp_ftphandle);
 }
 
 /*
@@ -1222,8 +1234,10 @@ int ftplib::FtpXfer(const char *localfile, const char *path, ftphandle *nControl
 		if (type == ftplib::filereadappend) { ac[0] = 'a'; ac[1] = '\0'; }
 		if (type == ftplib::filewrite) { ac[0] = 'r'; ac[1] = '\0'; }
 		if (mode == ftplib::image) ac[1] = 'b';
-
-		local = fopen64(localfile, ac);
+		
+		char finalCode[20] = "";
+		sprintf(finalCode, "%s, ccs=UNICODE", ac);
+		local = fopen64(localfile, finalCode);
 		if (local == NULL)
 		{
 			strncpy(nControl->response, strerror(errno), sizeof(nControl->response));
@@ -1356,7 +1370,6 @@ int ftplib::Put(const char *inputfile, const char *path, transfermode mode, off6
 	if (offset == 0) return FtpXfer(inputfile, path, mp_ftphandle, ftplib::filewrite, mode);
 	else return FtpXfer(inputfile, path, mp_ftphandle, ftplib::filewriteappend, mode);
 }
-
 
 int ftplib::Rename(const char *src, const char *dst)
 {
