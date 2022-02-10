@@ -34,11 +34,11 @@
 
 #if defined(_WIN32)
 
-//#if BUILDING_DLL
-//# define DLLIMPORT __declspec (dllexport)
-//#else /* Not BUILDING_DLL */
-//# define DLLIMPORT __declspec (dllimport)
-//#endif /* Not BUILDING_DLL */
+#if BUILDING_DLL
+# define DLLIMPORT __declspec (dllexport)
+#else /* Not BUILDING_DLL */
+# define DLLIMPORT __declspec (dllimport)
+#endif /* Not BUILDING_DLL */
 
 #include <time.h>
 #endif
@@ -124,7 +124,7 @@ struct ftphandle {
 };
 
 #if defined(_WIN32)
-class SIMPLEFTP_API ftplib {
+class DLLIMPORT ftplib {
 #else
 class ftplib {
 #endif
@@ -169,6 +169,7 @@ public:
   char* LastResponse();
   int Connect(const char *host);
   int Login(const char *user, const char *pass);
+  int SwitchToUtf8();
   int Site(const char *cmd);
   int Raw(const char *cmd);
   int SysType(char *buf, int max);
