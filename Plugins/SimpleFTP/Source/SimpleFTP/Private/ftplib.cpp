@@ -1212,7 +1212,26 @@ int ftplib::Pwd(char *path, int max)
 	*b = '\0';
 	return 1;
 }
-
+bool UTF8ToUnicode(const char* UTF8, wchar_t* strUnicode)
+{
+	DWORD dwUnicodeLen;    //转换后Unicode的长度
+	TCHAR* pwText;      //保存Unicode的指针
+   // wchar_t* strUnicode;    //返回值
+	//获得转换后的长度，并分配内存
+	dwUnicodeLen = MultiByteToWideChar(CP_UTF8, 0, UTF8, -1, NULL, 0);
+	pwText = new TCHAR[dwUnicodeLen];
+	if (!pwText)
+	{
+		return false;
+	}
+	//转为Unicode
+	MultiByteToWideChar(CP_UTF8, 0, UTF8, -1, pwText, dwUnicodeLen);
+	//转为CString
+	wcscpy(strUnicode, pwText);
+	//清除内存
+	delete[]pwText;
+	return true;
+}
 /*
  * FtpXfer - issue a command and transfer data
  *
@@ -1227,7 +1246,7 @@ int ftplib::FtpXfer(const char *localfile, const char *path, ftphandle *nControl
 
 	if (localfile != NULL)
 	{
-		char ac[3] = "  ";
+		wchar_t ac[3] = L"";
 		if ((type == ftplib::dir) || (type == ftplib::dirverbose)) { ac[0] = 'w'; ac[1] = '\0'; }
 		if (type == ftplib::fileread) { ac[0] = 'w'; ac[1] = '\0'; }
 		if (type == ftplib::filewriteappend) { ac[0] = 'r'; ac[1] = '\0'; }
@@ -1235,9 +1254,10 @@ int ftplib::FtpXfer(const char *localfile, const char *path, ftphandle *nControl
 		if (type == ftplib::filewrite) { ac[0] = 'r'; ac[1] = '\0'; }
 		if (mode == ftplib::image) ac[1] = 'b';
 		
-		char finalCode[20] = "";
-		sprintf(finalCode, "%s, ccs=UNICODE", ac);
-		local = fopen64(localfile, finalCode);
+		wchar_t strUnicode[100];
+		UTF8ToUnicode(localfile, strUnicode);
+
+		local = _wfopen(strUnicode, ac);
 		if (local == NULL)
 		{
 			strncpy(nControl->response, strerror(errno), sizeof(nControl->response));
